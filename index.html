@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Techno Encryption</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        body {
+            font-family: "Courier New", monospace;
+            text-align: center;
+            background: #0a0a0a;
+            color: #00ffaa;
+            padding-top: 30px;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        h1 {
+            text-transform: uppercase;
+            font-size: 20px;
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+            color: #00ffcc;
+            text-shadow: 0 0 5px rgba(44, 213, 92, 0.925);
+        }
+        .button {
+            font-size: 16px;
+            padding: 0;
+            margin: 8px;
+            width: 50px;
+            height: 50px;
+            border: 1px solid #00ffaa;
+            background: rgba(0, 0, 0, 0.3);
+            color: #00ffcc;
+            cursor: pointer;
+            outline: none;
+            font-family: "Courier New", monospace;
+            text-transform: uppercase;
+            transition: all 0.1s;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0, 255, 200, 0.2);
+        }
+        .button::before {
+            content: "";
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            border: 1px solid rgba(0, 255, 200, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .button:active {
+            transform: scale(0.95);
+            background: rgba(0, 255, 200, 0.1);
+        }
+        .active {
+            background: rgba(0, 255, 200, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 200, 0.5);
+            color: #ffffff;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 350px;
+            margin: 0 auto 30px;
+        }
+        #dancer {
+            display: none;
+            width: 80px;
+            margin: 20px auto;
+            filter: hue-rotate(120deg) brightness(1.2);
+        }
+        .map-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px auto;
+            width: 100%;
+        }
+        #map {
+            width: 50%;
+            max-width: 500px;
+            min-width: 300px;
+            height: 300px;
+            border: 1px solid #00ffaa;
+            box-shadow: 0 0 15px rgba(0, 255, 200, 0.2);
+        }
+        .subtitle {
+            font-size: 12px;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            color: rgba(0, 255, 200, 0.7);
+        }
+        .led {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(0, 255, 200, 0.2);
+            display: inline-block;
+            margin: 0 2px;
+            transition: all 0.1s;
+        }
+        .active .led {
+            background: #00ffaa;
+            box-shadow: 0 0 5px #00ffaa;
+        }
+    </style>
+</head>
+<body>
+    <h1>欢迎光临</h1>
+    <p class="subtitle">Wovon man nicht sprechen kann, darüber muss man schweigen</p>
+
+    <div class="container" id="buttons"></div>
+
+    <img id="dancer" src="dancer.gif" alt="Dancing Pixel Character">
+
+    <div class="map-container">
+        <div id="map"></div>
+    </div>
+
+    <script>
+        function initMap() {
+            const location = [40.7128, -74.0060]; // New York
+            const map = L.map('map').setView(location, 10);  // 创建地图对象
+
+            // 使用深色地图主题
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+            }).addTo(map);
+
+            // 创建自定义样式的标记
+            const marker = L.marker(location, {
+                icon: L.divIcon({
+                    className: 'pulse-icon',
+                    html: '<div style="background-color: #00ffaa; width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 10px #00ffaa;"></div>',
+                    iconSize: [12, 12]
+                })
+            }).addTo(map)
+                .bindPopup("CURRENT LOCATION: NEW YORK").openPopup();
+
+            // 创建一个 popup 对象
+            var popup = L.popup({
+                className: 'custom-popup'
+            });
+
+            // 创建一个点击事件处理函数
+            function onMapClick(e) {
+                // 在点击位置显示经纬度的弹出框
+                popup
+                    .setLatLng(e.latlng)  // 设置弹出框位置为点击的经纬度
+                    .setContent("COORDINATES: " + e.latlng.toString().replace(/[()]/g, ''))  // 显示点击的经纬度
+                    .openOn(map);  // 打开弹出框
+            }
+
+            // 监听点击事件，调用 onMapClick 函数
+            map.on('click', onMapClick);
+        }
+
+        document.addEventListener("DOMContentLoaded", initMap);  // 页面加载完成后初始化地图
+
+        // 音频上下文和其他音频功能初始化
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const activeLoops = {}; // 记录哪些声音在播放
+        const bufferList = {};  // 存储已加载的 sample
+        const dancer = document.getElementById("dancer");
+        let globalBeatInterval = null;
+        let beatCount = 0;
+        const globalBPM = 120; // 统一BPM
+        const beatDuration = 60 / globalBPM; // 每拍持续时间(秒)
+
+        const samples = {
+            0: "shot.wav", 1: "gong.wav", 2: "A4.wav", 3: "lazer.wav", 4: "kick.wav",
+            5: "ClosedHiHat.wav", 6: "synth.wav", 7: "gabber.wav", 8: "gong.wav", 9: "love.wav"
+        };
+
+        // 定义复杂节奏模式（以拍子为单位的时间偏移数组）
+        const complexPatterns = {
+            0: [0, 0.5,0.75],                    // 每拍开始
+            1: [0, 0.25,0.75],              // 八分音符
+            2: [0, 0.5, 0.75],         // 前八后十六
+            3: [0],  // 十六分音符
+            4: [0],             // 三连音
+            5: [0, 0.75],              // 附点八分音符
+            6: [0],     // 切分音
+            7: [0], // 32分音符
+            8: [0.5, 0.75],              // 简单十六分音符
+            9: [0]      // 三连音变体
+        };
+
+        function loadSample(name, url) {
+            return fetch(url)
+                .then(response => response.arrayBuffer())
+                .then(data => audioCtx.decodeAudioData(data))
+                .then(buffer => { bufferList[name] = buffer; });
+        }
+
+        function playBuffer(buffer, time = 0) {
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioCtx.destination);
+            source.start(audioCtx.currentTime + time);
+        }
+
+        function checkDancer() {
+            if (Object.keys(activeLoops).length > 0) {
+                dancer.style.display = "block";
+            } else {
+                dancer.style.display = "none";
+            }
+        }
+
+        // 调度指定样本在当前节拍周期内的播放
+        function scheduleSampleForBeat(sampleNum) {
+            const pattern = complexPatterns[sampleNum];
+            const now = audioCtx.currentTime;
+            const buffer = bufferList[sampleNum];
+
+            if (!buffer) return;
+
+            // 计算当前节拍的开始时间
+            const beatStartTime = now - (now % beatDuration);
+            const nextBeatStartTime = beatStartTime + beatDuration;
+
+            // 调度当前节拍周期内的所有触发点
+            pattern.forEach(offset => {
+                const triggerTime = beatStartTime + offset * beatDuration;
+                if (triggerTime >= now) { // 只调度未来的触发点
+                    playBuffer(buffer, triggerTime - now);
+                }
+            });
+
+            // 调度下一个完整节拍周期内的所有触发点
+            pattern.forEach(offset => {
+                const triggerTime = nextBeatStartTime + offset * beatDuration;
+                playBuffer(buffer, triggerTime - now);
+            });
+        }
+
+        // 全局节拍器
+        function startGlobalBeat() {
+            // 先清除之前的定时器
+            if (globalBeatInterval) {
+                clearInterval(globalBeatInterval);
+            }
+
+            // 计算每拍间隔(ms)
+            const interval = beatDuration * 1000;
+
+            // 立即调度所有激活样本的第一拍
+            Object.keys(activeLoops).forEach(num => {
+                scheduleSampleForBeat(num);
+            });
+
+            // 设置定时器，每拍调度一次
+            globalBeatInterval = setInterval(() => {
+                beatCount++;
+                Object.keys(activeLoops).forEach(num => {
+                    scheduleSampleForBeat(num);
+                });
+            }, interval);
+        }
+
+        function toggleSound(num, button) {
+            if (activeLoops[num]) {
+                delete activeLoops[num];
+                button.classList.remove("active");
+
+                // 如果没有激活的轨道，停止全局节拍器
+                if (Object.keys(activeLoops).length === 0 && globalBeatInterval) {
+                    clearInterval(globalBeatInterval);
+                    globalBeatInterval = null;
+                    beatCount = 0;
+                }
+            } else {
+                activeLoops[num] = true;
+                button.classList.add("active");
+
+                // 如果全局节拍器未启动，开始节拍
+                if (!globalBeatInterval) {
+                    beatCount = 0;
+                    startGlobalBeat();
+                } else {
+                    // 如果节拍器已经在运行，立即调度这个新样本
+                    scheduleSampleForBeat(num);
+                }
+            }
+            checkDancer();
+        }
+
+        // 为每个按钮添加音频控制功能
+        const buttonContainer = document.getElementById("buttons");
+        for (let i = 0; i < 10; i++) {
+            const btn = document.createElement("button");
+            btn.innerHTML = `<span class="led"></span>${i}<span class="led"></span>`;
+            btn.className = "button";
+            btn.onclick = () => toggleSound(i, btn);
+            buttonContainer.appendChild(btn);
+        }
+
+        // 加载所有样本
+        for (const num in samples) {
+            loadSample(num, `samples/${samples[num]}`);
+        }
+    </script>
+</body>
+</html>
