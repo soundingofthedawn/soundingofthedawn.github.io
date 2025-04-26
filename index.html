@@ -173,21 +173,21 @@
         const beatDuration = 60 / globalBPM; // 每拍持续时间(秒)
 
         const samples = {
-            0: "shot.wav", 1: "gong.wav", 2: "A4.wav", 3: "lazer.wav", 4: "kick.wav",
-            5: "ClosedHiHat.wav", 6: "synth.wav", 7: "gabber.wav", 8: "gong.wav", 9: "love.wav"
+            0: "dan.mp3", 1: "gong.wav", 2: "dai.mp3", 3: "wai.mp3", 4: "kick.mp3",
+            5: "lai.mp3", 6: "gi.mp3", 7: "e.mp3", 8: "dee.mp3", 9: "love.mp3"
         };
 
         // 定义复杂节奏模式（以拍子为单位的时间偏移数组）
         const complexPatterns = {
             0: [0, 0.5,0.75],                    // 每拍开始
-            1: [0, 0.25,0.75],              // 八分音符
-            2: [0, 0.5, 0.75],         // 前八后十六
+            1: [0, 0.5],              // 八分音符
+            2: [0],         // 前八后十六
             3: [0],  // 十六分音符
             4: [0],             // 三连音
-            5: [0, 0.75],              // 附点八分音符
+            5: [0],              // 附点八分音符
             6: [0],     // 切分音
             7: [0], // 32分音符
-            8: [0.5, 0.75],              // 简单十六分音符
+            8: [0],              // 简单十六分音符
             9: [0]      // 三连音变体
         };
 
