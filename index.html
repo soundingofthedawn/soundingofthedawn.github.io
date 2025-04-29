@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Techno Techno</title>
+    <title>Techno Encryption</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <style>
@@ -124,15 +124,15 @@
 
     <script>
         function initMap() {
-            const location = [40.7128, -74.0060]; // New York
-            const map = L.map('map').setView(location, 10);  // 创建地图对象
+            const location = [40.7128, -74.0060]; 
+            const map = L.map('map').setView(location, 10);  
 
-            // 使用深色地图主题
+
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
             }).addTo(map);
 
-            // 创建自定义样式的标记
+
             const marker = L.marker(location, {
                 icon: L.divIcon({
                     className: 'pulse-icon',
@@ -142,53 +142,75 @@
             }).addTo(map)
                 .bindPopup("CURRENT LOCATION: NEW YORK").openPopup();
 
-            // 创建一个 popup 对象
+
             var popup = L.popup({
                 className: 'custom-popup'
             });
 
-            // 创建一个点击事件处理函数
+
             function onMapClick(e) {
-                // 在点击位置显示经纬度的弹出框
+
                 popup
-                    .setLatLng(e.latlng)  // 设置弹出框位置为点击的经纬度
-                    .setContent("COORDINATES: " + e.latlng.toString().replace(/[()]/g, ''))  // 显示点击的经纬度
-                    .openOn(map);  // 打开弹出框
+                    .setLatLng(e.latlng)  
+                    .setContent("COORDINATES: " + e.latlng.toString().replace(/[()]/g, ''))  
+                    .openOn(map); 
             }
 
-            // 监听点击事件，调用 onMapClick 函数
+
             map.on('click', onMapClick);
         }
 
-        document.addEventListener("DOMContentLoaded", initMap);  // 页面加载完成后初始化地图
+        document.addEventListener("DOMContentLoaded", initMap); 
 
-        // 音频上下文和其他音频功能初始化
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const activeLoops = {}; // 记录哪些声音在播放
-        const bufferList = {};  // 存储已加载的 sample
+        const activeLoops = {};
+        const bufferList = {}; 
         const dancer = document.getElementById("dancer");
         let globalBeatInterval = null;
         let beatCount = 0;
-        const globalBPM = 120; // 统一BPM
-        const beatDuration = 60 / globalBPM; // 每拍持续时间(秒)
+        const globalBPM = 120; 
+        const beatDuration = 60 / globalBPM; 
+
+
+        const compressor = audioCtx.createDynamicsCompressor();
+        compressor.threshold.setValueAtTime(-24, audioCtx.currentTime);
+        compressor.knee.setValueAtTime(30, audioCtx.currentTime);
+        compressor.ratio.setValueAtTime(12, audioCtx.currentTime);
+        compressor.attack.setValueAtTime(0.003, audioCtx.currentTime);
+        compressor.release.setValueAtTime(0.25, audioCtx.currentTime);
+        compressor.connect(audioCtx.destination);
 
         const samples = {
-            0: "dan.mp3", 1: "gong.wav", 2: "dai.mp3", 3: "wai.mp3", 4: "kick.mp3",
-            5: "lai.mp3", 6: "gi.mp3", 7: "e.mp3", 8: "dee.mp3", 9: "love.mp3"
+            0: "gong.wav", 1: "biu.wav", 2: "dang.wav", 3: "a.mp3", 4: "ie.wav",
+            5: "duo.wav", 6: "deng.wav", 7: "seven.wav", 8: "ao.wav", 9: "love.mp3"
         };
 
-        // 定义复杂节奏模式（以拍子为单位的时间偏移数组）
+
         const complexPatterns = {
-            0: [0, 0.5,0.75],                    // 每拍开始
-            1: [0, 0.5],              // 八分音符
-            2: [0],         // 前八后十六
-            3: [0],  // 十六分音符
-            4: [0],             // 三连音
-            5: [0],              // 附点八分音符
-            6: [0],     // 切分音
-            7: [0], // 32分音符
-            8: [0],              // 简单十六分音符
-            9: [0]      // 三连音变体
+            0: [0,0.5,0.75],                
+            1: [0],          
+            2: [0],                    
+            3: [0],                    
+            4: [0],                   
+            5: [0],                   
+            6: [0],                  
+            7: [0],                    
+            8: [0],                 
+            9: [0]                     
+        };
+
+        // 定义每个样本的音量平衡
+        const sampleVolumes = {
+            0: 0.8,  // ie.wav
+            1: 0.8,  // gong.wav
+            2: 1,  // dai.mp3
+            3: 0.6,  // wai.mp3
+            4: 1,  // kick.mp3
+            5: 1,  // lai.mp3
+            6: 1.3,  // gi.mp3
+            7: 0.9,  // e1.mp3
+            8: 1,  // dee.mp3
+            9: 0.4   // love.mp3
         };
 
         function loadSample(name, url) {
@@ -198,11 +220,47 @@
                 .then(buffer => { bufferList[name] = buffer; });
         }
 
-        function playBuffer(buffer, time = 0) {
+        function playBuffer(buffer, time = 0, num) {
+            const randomDelay = Math.random() * 0.001; 
             const source = audioCtx.createBufferSource();
+            const gainNode = audioCtx.createGain();
+            const panner = audioCtx.createStereoPanner();
+            const filter = audioCtx.createBiquadFilter();
+
+
+            gainNode.gain.value = sampleVolumes[num] || 0.8;
+
+            panner.pan.value = (num % 10) * 0.2 - 0.9;
+
+            if ([4].includes(num)) { 
+                filter.type = "lowshelf";
+                filter.frequency.value = 250;
+                filter.gain.value = 2;
+            } else if ([1, 2, 3, 5, 8].includes(num)) { 
+                filter.type = "peaking";
+                filter.frequency.value = 1000;
+                filter.Q.value = 1;
+                filter.gain.value = 1.5;
+            } else { 
+                filter.type = "highshelf";
+                filter.frequency.value = 4000;
+                filter.gain.value = 1;
+            }
+
+            source.connect(gainNode);
+            gainNode.connect(filter);
+            filter.connect(panner);
+            panner.connect(compressor);
+
             source.buffer = buffer;
-            source.connect(audioCtx.destination);
-            source.start(audioCtx.currentTime + time);
+            source.start(audioCtx.currentTime + time + randomDelay);
+
+
+            source.onended = () => {
+                gainNode.disconnect();
+                filter.disconnect();
+                panner.disconnect();
+            };
         }
 
         function checkDancer() {
@@ -213,7 +271,6 @@
             }
         }
 
-        // 调度指定样本在当前节拍周期内的播放
         function scheduleSampleForBeat(sampleNum) {
             const pattern = complexPatterns[sampleNum];
             const now = audioCtx.currentTime;
@@ -221,41 +278,39 @@
 
             if (!buffer) return;
 
-            // 计算当前节拍的开始时间
+
             const beatStartTime = now - (now % beatDuration);
             const nextBeatStartTime = beatStartTime + beatDuration;
 
-            // 调度当前节拍周期内的所有触发点
+
             pattern.forEach(offset => {
                 const triggerTime = beatStartTime + offset * beatDuration;
                 if (triggerTime >= now) { // 只调度未来的触发点
-                    playBuffer(buffer, triggerTime - now);
+                    playBuffer(buffer, triggerTime - now, sampleNum);
                 }
             });
 
-            // 调度下一个完整节拍周期内的所有触发点
+
             pattern.forEach(offset => {
                 const triggerTime = nextBeatStartTime + offset * beatDuration;
-                playBuffer(buffer, triggerTime - now);
+                playBuffer(buffer, triggerTime - now, sampleNum);
             });
         }
 
-        // 全局节拍器
+
         function startGlobalBeat() {
-            // 先清除之前的定时器
+
             if (globalBeatInterval) {
                 clearInterval(globalBeatInterval);
             }
 
-            // 计算每拍间隔(ms)
             const interval = beatDuration * 1000;
 
-            // 立即调度所有激活样本的第一拍
+
             Object.keys(activeLoops).forEach(num => {
                 scheduleSampleForBeat(num);
             });
 
-            // 设置定时器，每拍调度一次
             globalBeatInterval = setInterval(() => {
                 beatCount++;
                 Object.keys(activeLoops).forEach(num => {
@@ -268,8 +323,7 @@
             if (activeLoops[num]) {
                 delete activeLoops[num];
                 button.classList.remove("active");
-
-                // 如果没有激活的轨道，停止全局节拍器
+                
                 if (Object.keys(activeLoops).length === 0 && globalBeatInterval) {
                     clearInterval(globalBeatInterval);
                     globalBeatInterval = null;
@@ -284,14 +338,12 @@
                     beatCount = 0;
                     startGlobalBeat();
                 } else {
-                    // 如果节拍器已经在运行，立即调度这个新样本
                     scheduleSampleForBeat(num);
                 }
             }
             checkDancer();
         }
 
-        // 为每个按钮添加音频控制功能
         const buttonContainer = document.getElementById("buttons");
         for (let i = 0; i < 10; i++) {
             const btn = document.createElement("button");
@@ -301,7 +353,6 @@
             buttonContainer.appendChild(btn);
         }
 
-        // 加载所有样本
         for (const num in samples) {
             loadSample(num, `samples/${samples[num]}`);
         }
