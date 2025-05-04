@@ -108,6 +108,22 @@
             background: #00ffaa;
             box-shadow: 0 0 5px #00ffaa;
         }
+        .women-composers {
+    margin: 100px auto;
+    padding: 20px;
+    max-width: 800px;
+    text-align: center; /* 容器居中 */
+    color: rgba(0, 255, 200, 0.7);
+    font-size: 14px;
+    line-height: 1.8;
+    opacity: 0.8;
+}
+.women-composers p {
+    margin: 5px 0;
+    text-align: left; 
+    display: inline-block; 
+    width: 100%;
+}
     </style>
 </head>
 <body>
@@ -122,10 +138,39 @@
         <div id="map"></div>
     </div>
 
+    <div class="women-composers">
+        <p>A – Daphne Oram - Co-founded BBC Radiophonic Workshop, invented graphical sound synthesis (Oramics).</p>
+        <p>B – Bebe Barron - Created first all-electronic film score for Forbidden Planet (1956) with Louis Barron.</p>
+        <p>C – Else Marie Pade - Danish pioneer of musique concrète, created groundbreaking tape works in 1950s.</p>
+        <p>D – Pauline Oliveros - Deep Listening pioneer, revolutionized electronic improvisation and meditation music.</p>
+        <p>E – Wendy Carlos - Made synthesizers mainstream with Switched-On Bach (1968), developed early Moog techniques.</p>
+        <p>F – Delia Derbyshire - Realized the iconic Doctor Who theme (1963) using oscillators and tape manipulation.</p>
+        <p>G – Eliane Radigue - Master of minimalist drone music using ARP 2500 synthesizer since 1970s.</p>
+        <p>H – Johanna M. Beyer - German-American composer who wrote electronic-inspired scores in 1930s (pre-synthesis).</p>
+        <p>I – Teresa Rampazzi - Italian computer music researcher who co-founded NPS Studio in 1960s.</p>
+        <p>J – Suzanne Ciani - Buchla synth virtuoso who brought electronic sounds to advertising in 1970s.</p>
+        <p>K – Clara Rockmore - Elevated the theremin to concert instrument status in 1930s-40s.</p>
+        <p>L – Laurie Spiegel - Developed algorithmic composition software at Bell Labs, featured on NASA's Golden Record.</p>
+        <p>M – Marga Richter - Classical composer who integrated electronic tape techniques in 1950s orchestral works.</p>
+        <p>N – Miya Masaoka - Japanese-American artist blending koto with live electronics since 1980s.</p>
+        <p>O – Priscilla McLean - American composer creating wild tape-and-synthesizer works since 1960s.</p>
+        <p>P – Ruth White - Early Moog experimenter who composed electronic adaptations of poetry in 1960s.</p>
+        <p>Q – Hildegard Westerkamp - Canadian sound ecologist transforming environmental recordings into compositions.</p>
+        <p>R – Alice Shields - Columbia-Princeton Electronic Music Center composer known for vocal electronic works.</p>
+        <p>S – Lydia Kavina - Contemporary theremin virtuoso carrying on Clara Rockmore's legacy.</p>
+        <p>T – Annea Lockwood - New Zealand pioneer of sonic environments and experimental electronics since 1960s.</p>
+        <p>U – Megan Roberts - Early digital music innovator at MIT in 1970s, developed interactive systems.</p>
+        <p>V – Cecile Le Prado - French composer merging acoustic instruments with real-time electronics since 1980s.</p>
+        <p>W – Jacqueline Humbert - Experimental vocalist and electronic music theater creator since 1970s.</p>
+        <p>X – Xenia Cage - Avant-garde composer and wife of John Cage, created early electronic visual music.</p>
+        <p>Y – Yoko Ono - Conceptual artist whose 1960s tape works anticipated ambient and noise music.</p>
+        <p>Z – Zuleikha Chaudhari - Indian sound artist bridging traditional music with contemporary electronics.</p>
+    </div>
+
     <script>
         function initMap() {
-            const location = [40.7128, -74.0060]; 
-            const map = L.map('map').setView(location, 10);  
+            const location = [40.7128, -74.0060];
+            const map = L.map('map').setView(location, 10);
 
 
             L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
@@ -151,25 +196,25 @@
             function onMapClick(e) {
 
                 popup
-                    .setLatLng(e.latlng)  
-                    .setContent("COORDINATES: " + e.latlng.toString().replace(/[()]/g, ''))  
-                    .openOn(map); 
+                    .setLatLng(e.latlng)
+                    .setContent("COORDINATES: " + e.latlng.toString().replace(/[()]/g, ''))
+                    .openOn(map);
             }
 
 
             map.on('click', onMapClick);
         }
 
-        document.addEventListener("DOMContentLoaded", initMap); 
+        document.addEventListener("DOMContentLoaded", initMap);
 
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const activeLoops = {};
-        const bufferList = {}; 
+        const bufferList = {};
         const dancer = document.getElementById("dancer");
         let globalBeatInterval = null;
         let beatCount = 0;
-        const globalBPM = 120; 
-        const beatDuration = 60 / globalBPM; 
+        const globalBPM = 120;
+        const beatDuration = 60 / globalBPM;
 
 
         const compressor = audioCtx.createDynamicsCompressor();
@@ -187,16 +232,16 @@
 
 
         const complexPatterns = {
-            0: [0,0.5,0.75],                
-            1: [0],          
-            2: [0],                    
-            3: [0],                    
-            4: [0],                   
-            5: [0],                   
-            6: [0],                  
-            7: [0],                    
-            8: [0],                 
-            9: [0]                     
+            0: [0,0.5,0.75],
+            1: [0],
+            2: [0],
+            3: [0],
+            4: [0],
+            5: [0],
+            6: [0],
+            7: [0],
+            8: [0],
+            9: [0]
         };
 
         // 定义每个样本的音量平衡
@@ -221,7 +266,7 @@
         }
 
         function playBuffer(buffer, time = 0, num) {
-            const randomDelay = Math.random() * 0.001; 
+            const randomDelay = Math.random() * 0.001;
             const source = audioCtx.createBufferSource();
             const gainNode = audioCtx.createGain();
             const panner = audioCtx.createStereoPanner();
@@ -232,16 +277,16 @@
 
             panner.pan.value = (num % 10) * 0.2 - 0.9;
 
-            if ([4].includes(num)) { 
+            if ([4].includes(num)) {
                 filter.type = "lowshelf";
                 filter.frequency.value = 250;
                 filter.gain.value = 2;
-            } else if ([1, 2, 3, 5, 8].includes(num)) { 
+            } else if ([1, 2, 3, 5, 8].includes(num)) {
                 filter.type = "peaking";
                 filter.frequency.value = 1000;
                 filter.Q.value = 1;
                 filter.gain.value = 1.5;
-            } else { 
+            } else {
                 filter.type = "highshelf";
                 filter.frequency.value = 4000;
                 filter.gain.value = 1;
@@ -323,7 +368,7 @@
             if (activeLoops[num]) {
                 delete activeLoops[num];
                 button.classList.remove("active");
-                
+
                 if (Object.keys(activeLoops).length === 0 && globalBeatInterval) {
                     clearInterval(globalBeatInterval);
                     globalBeatInterval = null;
@@ -333,7 +378,6 @@
                 activeLoops[num] = true;
                 button.classList.add("active");
 
-                // 如果全局节拍器未启动，开始节拍
                 if (!globalBeatInterval) {
                     beatCount = 0;
                     startGlobalBeat();
@@ -359,3 +403,4 @@
     </script>
 </body>
 </html>
+
